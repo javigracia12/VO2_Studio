@@ -13,6 +13,7 @@ import {
   formatDate,
 } from "@/lib/schedule";
 import { useProgress, useWeekStats } from "@/lib/hooks";
+import { type ProgressMap } from "@/lib/progress";
 import SessionCard from "@/components/SessionCard";
 
 const PHASES: { phase: Phase; weeks: number[] }[] = [
@@ -122,7 +123,7 @@ function WeekAccordion({
   isExpanded: boolean;
   isCurrent: boolean;
   onToggle: () => void;
-  progress: Record<string, boolean>;
+  progress: ProgressMap;
   toggle: (id: string) => void;
   isDone: (id: string) => boolean;
 }) {
