@@ -18,7 +18,7 @@ import ProgressRing from "@/components/ProgressRing";
 import WeekChart from "@/components/WeekChart";
 
 export default function Dashboard() {
-  // Minor change to force Cloudflare redeploy during debugging.
+  // Tiny redeploy trigger for Cloudflare Pages.
   const { progress, toggle, isDone } = useProgress();
   const stats = useStats(progress);
   const started = hasTrainingStarted();
