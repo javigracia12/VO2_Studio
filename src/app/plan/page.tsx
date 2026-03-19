@@ -13,7 +13,7 @@ import {
   formatDate,
 } from "@/lib/schedule";
 import { useProgress, useWeekStats } from "@/lib/hooks";
-import { type ProgressMap } from "@/lib/progress";
+import { type ProgressMap, type SessionEntry } from "@/lib/progress";
 import SessionCard from "@/components/SessionCard";
 
 const PHASES: { phase: Phase; weeks: number[] }[] = [
@@ -100,6 +100,8 @@ export default function PlanPage() {
                   progress={progress}
                   toggle={toggle}
                   isDone={isDone}
+                  saveEntry={saveEntry}
+                  getEntry={getEntry}
                 />
               ))}
             </div>
@@ -118,6 +120,8 @@ function WeekAccordion({
   progress,
   toggle,
   isDone,
+  saveEntry,
+  getEntry,
 }: {
   week: (typeof PLAN)[number];
   isExpanded: boolean;
@@ -126,6 +130,8 @@ function WeekAccordion({
   progress: ProgressMap;
   toggle: (id: string) => void;
   isDone: (id: string) => boolean;
+  saveEntry: (id: string, rpe: number, note: string) => void;
+  getEntry: (id: string) => SessionEntry | undefined;
 }) {
   const meta = PHASE_META[week.phase];
   const stats = useWeekStats(week.weekNumber, progress);
