@@ -1,6 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import { type Session, type Intensity } from "@/data/plan";
+import { type SessionEntry } from "@/lib/progress";
+import { getFueling } from "@/lib/fueling";
+import RpePanel from "@/components/RpePanel";
 
 const TYPE_ICON: Record<string, string> = {
   "bike-trainer": "🚴",
@@ -21,19 +25,42 @@ const INTENSITY_STYLES: Record<Intensity, { dot: string; label: string }> = {
 
 interface SessionCardProps {
   session: Session;
+  entry?: SessionEntry;
   isDone?: boolean;
   onToggle?: (id: string) => void;
+  onSaveEntry?: (id: string, rpe: number, note: string) => void;
   compact?: boolean;
 }
 
 export default function SessionCard({
   session,
+  entry,
   isDone = false,
   onToggle,
+  onSaveEntry,
   compact = false,
 }: SessionCardProps) {
+  const [showRpe, setShowRpe] = useState(false);
   const intensity = INTENSITY_STYLES[session.intensity];
   const icon = TYPE_ICON[session.type] ?? "📋";
+  const fueling = getFueling(session);
+  const hasRpe = !!entry?.rpe;
+
+  function handleToggle() {
+    if (!onToggle) return;
+    onToggle(session.id);
+    // Only show RPE prompt when marking done (not undoing) and no entry yet
+    if (!isDone && !hasRpe && onSaveEntry) {
+      setShowRpe(true);
+    } else {
+      setShowRpe(false);
+    }
+  }
+
+  function handleSaveEntry(rpe: number, note: string) {
+    onSaveEntry?.(session.id, rpe, note);
+    setShowRpe(false);
+  }
 
   if (compact) {
     return (
@@ -55,17 +82,25 @@ export default function SessionCard({
             <p className="text-xs text-muted">{formatDuration(session.durationMinutes)}</p>
           )}
         </div>
-        <div className={`w-2 h-2 rounded-full shrink-0 ${intensity.dot}`} />
+        <div className="flex items-center gap-1.5 shrink-0">
+          {hasRpe && (
+            <span className="text-[10px] font-bold text-muted bg-background border border-border rounded-full px-1.5 py-0.5">
+              {entry.rpe}
+            </span>
+          )}
+          <div className={`w-2 h-2 rounded-full ${intensity.dot}`} />
+        </div>
       </div>
     );
   }
 
   return (
     <div
-      className={`group bg-card border border-border rounded-2xl p-5 transition-all duration-200 hover:shadow-sm ${
-        isDone ? "opacity-60" : ""
+      className={`bg-card border border-border rounded-2xl p-5 transition-all duration-200 hover:shadow-sm ${
+        isDone ? "opacity-70" : ""
       }`}
     >
+      {/* Header row */}
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-start gap-3 flex-1 min-w-0">
           <span className="text-2xl mt-0.5 shrink-0">{icon}</span>
@@ -93,9 +128,11 @@ export default function SessionCard({
             )}
           </div>
         </div>
+
+        {/* Done toggle */}
         {onToggle && session.type !== "rest" && session.durationMinutes > 0 && (
           <button
-            onClick={() => onToggle(session.id)}
+            onClick={handleToggle}
             className={`shrink-0 w-7 h-7 rounded-full border-2 flex items-center justify-center transition-all duration-200 ${
               isDone
                 ? "bg-done border-done text-white"
@@ -111,6 +148,72 @@ export default function SessionCard({
           </button>
         )}
       </div>
+
+      {/* Fueling */}
+      {fueling.during && session.type !== "rest" && (
+        <div className="mt-4 pt-3 border-t border-border/60 space-y-1.5">
+          <p className="text-[10px] font-semibold text-muted uppercase tracking-wider">
+            Nutrition
+          </p>
+          <div className="flex items-start gap-2">
+            <span className="text-sm mt-0.5">🍌</span>
+            <div>
+              <p className="text-sm font-medium text-foreground">
+                {fueling.during}
+              </p>
+              {fueling.during_detail && (
+                <p className="text-xs text-muted mt-0.5">
+                  {fueling.during_detail}
+                </p>
+              )}
+            </div>
+          </div>
+          {fueling.post && (
+            <div className="flex items-start gap-2">
+              <span className="text-sm mt-0.5">🔄</span>
+              <div>
+                <p className="text-[11px] font-semibold text-foreground">
+                  Post-ride
+                </p>
+                <p className="text-xs text-muted">{fueling.post}</p>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* RPE badge (already saved) */}
+      {isDone && hasRpe && !showRpe && (
+        <div className="mt-3 pt-3 border-t border-border/60 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-muted">Effort</span>
+            <span className="text-sm font-bold text-foreground bg-background border border-border rounded-full w-7 h-7 flex items-center justify-center">
+              {entry.rpe}
+            </span>
+            {entry.note && (
+              <span className="text-xs text-muted italic truncate max-w-[180px]">
+                "{entry.note}"
+              </span>
+            )}
+          </div>
+          <button
+            onClick={() => setShowRpe(true)}
+            className="text-[10px] text-muted-light hover:text-muted transition-colors"
+          >
+            Edit
+          </button>
+        </div>
+      )}
+
+      {/* RPE entry panel */}
+      {showRpe && onSaveEntry && (
+        <RpePanel
+          initialRpe={entry?.rpe}
+          initialNote={entry?.note}
+          onSave={handleSaveEntry}
+          onSkip={() => setShowRpe(false)}
+        />
+      )}
     </div>
   );
 }

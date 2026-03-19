@@ -18,8 +18,7 @@ import ProgressRing from "@/components/ProgressRing";
 import WeekChart from "@/components/WeekChart";
 
 export default function Dashboard() {
-  // Tiny redeploy trigger for Cloudflare Pages.
-  const { progress, toggle, isDone } = useProgress();
+  const { progress, toggle, isDone, saveEntry, getEntry } = useProgress();
   const stats = useStats(progress);
   const started = hasTrainingStarted();
   const weekNum = getCurrentWeekNumber();
@@ -127,8 +126,10 @@ export default function Dashboard() {
               <SessionCard
                 key={session.id}
                 session={session}
+                entry={getEntry(session.id)}
                 isDone={isDone(session.id)}
                 onToggle={toggle}
+                onSaveEntry={saveEntry}
               />
             ))}
           </div>
@@ -142,8 +143,10 @@ export default function Dashboard() {
                 <SessionCard
                   key={session.id}
                   session={session}
+                  entry={getEntry(session.id)}
                   isDone={isDone(session.id)}
                   onToggle={toggle}
+                  onSaveEntry={saveEntry}
                   compact
                 />
               ))}
@@ -160,8 +163,10 @@ export default function Dashboard() {
                   <SessionCard
                     key={session.id}
                     session={session}
+                    entry={getEntry(session.id)}
                     isDone={isDone(session.id)}
                     onToggle={toggle}
+                    onSaveEntry={saveEntry}
                     compact
                   />
                 ))}

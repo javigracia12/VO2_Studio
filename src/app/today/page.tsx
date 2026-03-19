@@ -13,7 +13,7 @@ import { useProgress } from "@/lib/hooks";
 import SessionCard from "@/components/SessionCard";
 
 export default function TodayPage() {
-  const { toggle, isDone } = useProgress();
+  const { toggle, isDone, saveEntry, getEntry } = useProgress();
   const started = hasTrainingStarted();
   const todayPlan = getTodayPlan();
   const tomorrowPlan = getTomorrowPlan();
@@ -99,8 +99,10 @@ export default function TodayPage() {
             <SessionCard
               key={session.id}
               session={session}
+              entry={getEntry(session.id)}
               isDone={isDone(session.id)}
               onToggle={toggle}
+              onSaveEntry={saveEntry}
             />
           ))}
         </div>
@@ -117,8 +119,10 @@ export default function TodayPage() {
               <SessionCard
                 key={session.id}
                 session={session}
+                entry={getEntry(session.id)}
                 isDone={isDone(session.id)}
                 onToggle={toggle}
+                onSaveEntry={saveEntry}
               />
             ))}
           </div>

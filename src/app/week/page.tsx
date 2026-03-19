@@ -13,7 +13,7 @@ import { useProgress, useWeekStats } from "@/lib/hooks";
 import SessionCard from "@/components/SessionCard";
 
 export default function WeekPage() {
-  const { progress, toggle, isDone } = useProgress();
+  const { progress, toggle, isDone, saveEntry, getEntry } = useProgress();
   const weekNum = getCurrentWeekNumber();
   const week = PLAN.find((w) => w.weekNumber === weekNum);
   const weekStats = useWeekStats(weekNum, progress);
@@ -151,8 +151,10 @@ export default function WeekPage() {
                     <div className="flex-1">
                       <SessionCard
                         session={session}
+                        entry={getEntry(session.id)}
                         isDone={isDone(session.id)}
                         onToggle={toggle}
+                        onSaveEntry={saveEntry}
                         compact
                       />
                     </div>

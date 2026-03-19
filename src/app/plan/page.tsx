@@ -24,7 +24,7 @@ const PHASES: { phase: Phase; weeks: number[] }[] = [
 ];
 
 export default function PlanPage() {
-  const { progress, toggle, isDone } = useProgress();
+  const { progress, toggle, isDone, saveEntry, getEntry } = useProgress();
   const currentWeek = getCurrentWeekNumber();
   const [expandedWeek, setExpandedWeek] = useState<number | null>(currentWeek);
 
@@ -242,7 +242,10 @@ function WeekAccordion({
                         <div className="flex-1">
                           <SessionCard
                             session={session}
+                            entry={getEntry(session.id)}
                             isDone={isDone(session.id)}
+                            onToggle={toggle}
+                            onSaveEntry={saveEntry}
                             compact
                           />
                         </div>
