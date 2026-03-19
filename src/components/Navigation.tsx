@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import BrandLogo from "@/components/BrandLogo";
 
 const NAV_ITEMS = [
   {
@@ -61,8 +62,8 @@ export default function Navigation() {
     <>
       {/* Desktop sidebar */}
       <nav className="hidden lg:flex fixed left-0 top-0 bottom-0 w-[72px] flex-col items-center py-6 gap-1 bg-card border-r border-border z-50">
-        <div className="mb-6 text-lg font-semibold tracking-tight">
-          <span className="text-xl">🚴</span>
+        <div className="mb-6">
+          <BrandLogo variant="mark" className="justify-center" />
         </div>
         {NAV_ITEMS.map((item) => {
           const active = pathname === item.href;
