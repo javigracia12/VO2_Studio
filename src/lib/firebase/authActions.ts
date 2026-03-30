@@ -33,5 +33,8 @@ export async function resetPassword(email: string) {
 }
 
 export async function signOut() {
-  return firebaseSignOut(requireAuth());
+  const auth = getFirebaseAuth();
+  if (auth?.currentUser) {
+    await firebaseSignOut(auth);
+  }
 }

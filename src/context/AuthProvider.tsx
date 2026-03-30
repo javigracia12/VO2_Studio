@@ -9,7 +9,11 @@ import {
   type ReactNode,
 } from "react";
 import { onAuthStateChanged, type User } from "firebase/auth";
-import { getFirebaseAuth, isFirebaseConfigured } from "@/lib/firebase/client";
+import {
+  getFirebaseAuth,
+  getMissingFirebaseEnvVars,
+  isFirebaseConfigured,
+} from "@/lib/firebase/client";
 import {
   signInWithEmail as loginEmail,
   signUpWithEmail as registerEmail,
@@ -21,6 +25,8 @@ import {
 type AuthContextValue = {
   user: User | null;
   loading: boolean;
+  firebaseConfigured: boolean;
+  missingFirebaseEnvVars: string[];
   signInWithEmail: (email: string, password: string) => Promise<void>;
   signUpWithEmail: (email: string, password: string) => Promise<void>;
   signInWithGoogle: () => Promise<void>;
@@ -35,9 +41,11 @@ const PROGRESS_STORAGE_KEY = "riding-progress";
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const firebaseConfigured = isFirebaseConfigured();
+  const missingFirebaseEnvVars = getMissingFirebaseEnvVars();
 
   useEffect(() => {
-    if (!isFirebaseConfigured()) {
+    if (!firebaseConfigured) {
       setLoading(false);
       return;
     }
@@ -52,7 +60,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(u);
       setLoading(false);
     });
-  }, []);
+  }, [firebaseConfigured]);
 
   const signInWithEmail = useCallback(async (email: string, password: string) => {
     await loginEmail(email, password);
@@ -82,6 +90,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       value={{
         user,
         loading,
+        firebaseConfigured,
+        missingFirebaseEnvVars,
         signInWithEmail,
         signUpWithEmail,
         signInWithGoogle,

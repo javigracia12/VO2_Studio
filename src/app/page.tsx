@@ -23,7 +23,12 @@ function friendlyError(err: unknown): string {
   if (err instanceof FirebaseError) {
     return FIREBASE_ERRORS[err.code] ?? err.message;
   }
-  if (err instanceof Error) return err.message;
+  if (err instanceof Error) {
+    if (err.message === "Firebase is not configured") {
+      return "Firebase environment variables are missing. See the setup note above.";
+    }
+    return err.message;
+  }
   return "Something went wrong. Please try again.";
 }
 
@@ -34,8 +39,16 @@ const FEATURES = [
 ];
 
 export default function LandingPage() {
-  const { user, loading, signInWithEmail, signUpWithEmail, signInWithGoogle, resetPassword } =
-    useAuth();
+  const {
+    user,
+    loading,
+    firebaseConfigured,
+    missingFirebaseEnvVars,
+    signInWithEmail,
+    signUpWithEmail,
+    signInWithGoogle,
+    resetPassword,
+  } = useAuth();
   const router = useRouter();
 
   const [tab, setTab] = useState<Tab>("login");
@@ -44,6 +57,8 @@ export default function LandingPage() {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [resetSent, setResetSent] = useState(false);
+
+  const authDisabled = busy || !firebaseConfigured;
 
   useEffect(() => {
     if (!loading && user) {
@@ -117,6 +132,34 @@ export default function LandingPage() {
         }}
       />
 
+      {!firebaseConfigured && (
+        <div className="w-full max-w-lg mb-8 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-left text-sm text-amber-950">
+          <p className="font-semibold">Firebase is not configured in this build</p>
+          <p className="mt-1.5 text-amber-900/90 leading-relaxed">
+            <code className="text-xs bg-amber-100/80 px-1 rounded">NEXT_PUBLIC_FIREBASE_*</code>{" "}
+            variables were not available when the app was built. They must be set{" "}
+            <strong>before</strong> <code className="text-xs bg-amber-100/80 px-1 rounded">next build</code>{" "}
+            (Next.js embeds them in the browser bundle).
+          </p>
+          <ul className="mt-2 list-disc pl-5 text-xs text-amber-900/85 space-y-1">
+            <li>
+              <strong>Local:</strong> add <code className="bg-amber-100/80 px-1 rounded">.env.local</code>{" "}
+              at the project root (see <code className="bg-amber-100/80 px-1 rounded">.env.example</code>
+              ), then run <code className="bg-amber-100/80 px-1 rounded">rm -rf .next && npm run dev</code>.
+            </li>
+            <li>
+              <strong>Vercel / production:</strong> Project → Settings → Environment Variables → add
+              the same keys for Production, then trigger a new deployment.
+            </li>
+          </ul>
+          {missingFirebaseEnvVars.length > 0 && (
+            <p className="mt-2 text-xs font-mono text-amber-900/80 break-all">
+              Missing: {missingFirebaseEnvVars.join(", ")}
+            </p>
+          )}
+        </div>
+      )}
+
       {/* Hero */}
       <div className="text-center mb-10 max-w-md">
         <div className="flex justify-center mb-5">
@@ -151,12 +194,14 @@ export default function LandingPage() {
             {(["login", "register"] as const).map((t) => (
               <button
                 key={t}
+                type="button"
+                disabled={authDisabled}
                 onClick={() => {
                   setTab(t);
                   setError(null);
                   setResetSent(false);
                 }}
-                className={`py-3 text-sm font-semibold transition-colors ${
+                className={`py-3 text-sm font-semibold transition-colors disabled:opacity-50 ${
                   tab === t
                     ? "text-foreground border-b-2 border-foreground"
                     : "text-muted hover:text-foreground"
@@ -176,9 +221,10 @@ export default function LandingPage() {
                 id="email"
                 type="email"
                 required
+                disabled={authDisabled}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted-light focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand/40 transition"
+                className="w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted-light focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand/40 transition disabled:opacity-50"
                 placeholder="you@example.com"
                 autoComplete="email"
               />
@@ -193,9 +239,10 @@ export default function LandingPage() {
                 type="password"
                 required
                 minLength={6}
+                disabled={authDisabled}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted-light focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand/40 transition"
+                className="w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted-light focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand/40 transition disabled:opacity-50"
                 placeholder="At least 6 characters"
                 autoComplete={tab === "login" ? "current-password" : "new-password"}
               />
@@ -213,7 +260,7 @@ export default function LandingPage() {
 
             <button
               type="submit"
-              disabled={busy}
+              disabled={authDisabled}
               className="w-full rounded-xl bg-foreground text-background py-2.5 text-sm font-semibold hover:opacity-90 transition disabled:opacity-50"
             >
               {busy
@@ -227,8 +274,8 @@ export default function LandingPage() {
               <button
                 type="button"
                 onClick={handleReset}
-                disabled={busy}
-                className="w-full text-xs text-muted hover:text-foreground transition"
+                disabled={authDisabled}
+                className="w-full text-xs text-muted hover:text-foreground transition disabled:opacity-50"
               >
                 Forgot password?
               </button>
@@ -247,8 +294,9 @@ export default function LandingPage() {
           {/* Google */}
           <div className="px-6 pt-4 pb-6">
             <button
+              type="button"
               onClick={handleGoogle}
-              disabled={busy}
+              disabled={authDisabled}
               className="w-full flex items-center justify-center gap-2.5 rounded-xl border border-border bg-background py-2.5 text-sm font-medium text-foreground hover:bg-card-hover transition disabled:opacity-50"
             >
               <svg width="18" height="18" viewBox="0 0 24 24">
