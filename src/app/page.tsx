@@ -134,24 +134,17 @@ export default function LandingPage() {
 
       {!firebaseConfigured && (
         <div className="w-full max-w-lg mb-8 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-left text-sm text-amber-950">
-          <p className="font-semibold">Firebase is not configured in this build</p>
+          <p className="font-semibold">Firebase config not found on the server</p>
           <p className="mt-1.5 text-amber-900/90 leading-relaxed">
-            <code className="text-xs bg-amber-100/80 px-1 rounded">NEXT_PUBLIC_FIREBASE_*</code>{" "}
-            variables were not available when the app was built. They must be set{" "}
-            <strong>before</strong> <code className="text-xs bg-amber-100/80 px-1 rounded">next build</code>{" "}
-            (Next.js embeds them in the browser bundle).
+            The app loads your Firebase keys from the server (not from the browser build). Add them to{" "}
+            <code className="text-xs bg-amber-100/80 px-1 rounded">.env.local</code> in the project root
+            (same folder as <code className="text-xs bg-amber-100/80 px-1 rounded">package.json</code>), then
+            restart <code className="text-xs bg-amber-100/80 px-1 rounded">npm run dev</code>. See{" "}
+            <code className="text-xs bg-amber-100/80 px-1 rounded">.env.example</code> for names — you can
+            use either <code className="text-xs bg-amber-100/80 px-1 rounded">NEXT_PUBLIC_FIREBASE_*</code>{" "}
+            or <code className="text-xs bg-amber-100/80 px-1 rounded">FIREBASE_*</code> (without{" "}
+            <code className="text-xs bg-amber-100/80 px-1 rounded">NEXT_PUBLIC_</code>).
           </p>
-          <ul className="mt-2 list-disc pl-5 text-xs text-amber-900/85 space-y-1">
-            <li>
-              <strong>Local:</strong> add <code className="bg-amber-100/80 px-1 rounded">.env.local</code>{" "}
-              at the project root (see <code className="bg-amber-100/80 px-1 rounded">.env.example</code>
-              ), then run <code className="bg-amber-100/80 px-1 rounded">rm -rf .next && npm run dev</code>.
-            </li>
-            <li>
-              <strong>Vercel / production:</strong> Project → Settings → Environment Variables → add
-              the same keys for Production, then trigger a new deployment.
-            </li>
-          </ul>
           {missingFirebaseEnvVars.length > 0 && (
             <p className="mt-2 text-xs font-mono text-amber-900/80 break-all">
               Missing: {missingFirebaseEnvVars.join(", ")}

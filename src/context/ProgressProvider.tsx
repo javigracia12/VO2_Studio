@@ -19,7 +19,6 @@ import {
   type SessionEntry,
 } from "@/lib/progress";
 import { useAuth } from "@/context/AuthProvider";
-import { isFirebaseConfigured } from "@/lib/firebase/client";
 import {
   initialSyncProgress,
   persistProgressRemote,
@@ -37,7 +36,7 @@ type ProgressContextValue = {
 const ProgressContext = createContext<ProgressContextValue | null>(null);
 
 export function ProgressProvider({ children }: { children: ReactNode }) {
-  const { user } = useAuth();
+  const { user, firebaseConfigured } = useAuth();
   const [progress, setProgress] = useState<ProgressMap>(() => loadProgress());
   const uidRef = useRef<string | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -55,7 +54,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    if (!isFirebaseConfigured() || !user) {
+    if (!firebaseConfigured || !user) {
       uidRef.current = null;
       return;
     }
@@ -81,7 +80,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
       unsubDoc?.();
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
-  }, [user]);
+  }, [user, firebaseConfigured]);
 
   const toggle = useCallback(
     (sessionId: string) => {
