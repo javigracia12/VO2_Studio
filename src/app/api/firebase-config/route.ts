@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
 
+/** Required for Cloudflare Pages (`@cloudflare/next-on-pages`). */
+export const runtime = "edge";
+
 /** Server reads env at request time — works with `.env.local` and hosted env without rebuilding the client bundle. */
 function resolveWebConfig() {
   const apiKey =
