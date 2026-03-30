@@ -77,8 +77,8 @@ export default function LandingPage() {
 
   if (loading || user) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-[#0c0a09]">
-        <div className="w-6 h-6 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="w-6 h-6 border-2 border-foreground/20 border-t-foreground rounded-full animate-spin" />
       </div>
     );
   }
@@ -134,15 +134,15 @@ export default function LandingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0c0a09] text-white selection:bg-brand/30 overflow-x-hidden">
+    <div className="min-h-screen bg-background text-foreground selection:bg-brand/30 overflow-x-hidden">
 
       {/* ── NAV ── */}
-      <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-[#0c0a09]/70 border-b border-white/[0.06]">
+      <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-background/80 border-b border-border">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          <BrandLogo variant="horizontal" href={null} className="gap-2.5 [&_*]:!text-white [&_circle]:!stroke-white/15 [&_.text-muted]:!text-white/50" />
+          <BrandLogo variant="horizontal" href={null} className="gap-2.5" />
           <button
             onClick={scrollToAuth}
-            className="text-sm font-medium px-5 py-2 rounded-full bg-white text-[#0c0a09] hover:bg-white/90 transition-all"
+            className="text-sm font-medium px-5 py-2 rounded-full bg-foreground text-background hover:bg-foreground/90 transition-all"
           >
             Get started
           </button>
@@ -153,12 +153,12 @@ export default function LandingPage() {
       <section className="relative pt-40 pb-28 sm:pt-52 sm:pb-36 px-6">
         {/* Glow */}
         <div className="absolute inset-0 -z-10 overflow-hidden">
-          <div className="absolute top-[-20%] left-1/2 -translate-x-1/2 w-[900px] h-[600px] rounded-full bg-brand/[0.07] blur-[120px]" />
-          <div className="absolute top-[10%] right-[10%] w-[400px] h-[400px] rounded-full bg-brand-warm/[0.05] blur-[100px]" />
+          <div className="absolute top-[-20%] left-1/2 -translate-x-1/2 w-[900px] h-[600px] rounded-full bg-brand/[0.08] blur-[120px]" />
+          <div className="absolute top-[10%] right-[10%] w-[400px] h-[400px] rounded-full bg-brand-warm/[0.06] blur-[100px]" />
         </div>
 
         <div className="max-w-4xl mx-auto text-center">
-          <p className="text-xs sm:text-sm font-semibold uppercase tracking-[0.25em] text-white/40 mb-6">
+          <p className="text-xs sm:text-sm font-semibold uppercase tracking-[0.25em] text-muted mb-6">
             Structured cycling training
           </p>
 
@@ -169,7 +169,7 @@ export default function LandingPage() {
             </span>
           </h1>
 
-          <p className="mt-8 text-lg sm:text-xl text-white/50 max-w-2xl mx-auto leading-relaxed font-light">
+          <p className="mt-8 text-lg sm:text-xl text-muted max-w-2xl mx-auto leading-relaxed font-light">
             A 16-week periodised plan that takes you from base fitness to race-day
             sharpness. Track every session, log RPE, sync across devices.
           </p>
@@ -177,13 +177,13 @@ export default function LandingPage() {
           <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
             <button
               onClick={scrollToAuth}
-              className="px-8 py-3.5 rounded-full bg-white text-[#0c0a09] text-sm font-semibold hover:bg-white/90 transition-all shadow-[0_0_40px_rgba(37,99,235,0.15)]"
+              className="px-8 py-3.5 rounded-full bg-foreground text-background text-sm font-semibold hover:bg-foreground/90 transition-all shadow-[0_0_40px_rgba(37,99,235,0.15)]"
             >
               Start your plan
             </button>
             <a
               href="#phases"
-              className="text-sm font-medium text-white/40 hover:text-white/70 transition-colors flex items-center gap-1.5"
+              className="text-sm font-medium text-muted hover:text-foreground transition-colors flex items-center gap-1.5"
             >
               See the phases
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -195,15 +195,15 @@ export default function LandingPage() {
       </section>
 
       {/* ── STATS BAR ── */}
-      <section className="border-y border-white/[0.06] bg-white/[0.02]">
+      <section className="border-y border-border bg-card/50">
         <div className="max-w-4xl mx-auto px-6 py-10 grid grid-cols-3 gap-4 text-center">
           {STATS.map((s) => (
             <div key={s.label}>
-              <p className="text-3xl sm:text-4xl font-bold tracking-tight">
+              <p className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground">
                 {s.value}
-                <span className="text-base sm:text-lg font-normal text-white/30 ml-1">{s.unit}</span>
+                <span className="text-base sm:text-lg font-normal text-muted-light ml-1">{s.unit}</span>
               </p>
-              <p className="text-xs sm:text-sm text-white/35 mt-1">{s.label}</p>
+              <p className="text-xs sm:text-sm text-muted mt-1">{s.label}</p>
             </div>
           ))}
         </div>
@@ -212,13 +212,13 @@ export default function LandingPage() {
       {/* ── PHASES ── */}
       <section id="phases" className="py-24 sm:py-32 px-6">
         <div className="max-w-4xl mx-auto">
-          <p className="text-xs font-semibold uppercase tracking-[0.25em] text-white/30 mb-3">
+          <p className="text-xs font-semibold uppercase tracking-[0.25em] text-muted-light mb-3">
             The programme
           </p>
           <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
             Five phases. One goal.
           </h2>
-          <p className="mt-4 text-white/40 max-w-xl leading-relaxed">
+          <p className="mt-4 text-muted max-w-xl leading-relaxed">
             Each phase builds on the last — progressive overload calibrated to your
             FTP so you arrive at the start line in the form of your life.
           </p>
@@ -227,7 +227,7 @@ export default function LandingPage() {
             {PHASES.map((p, i) => (
               <div
                 key={p.name}
-                className="group flex items-start gap-5 rounded-2xl bg-white/[0.03] border border-white/[0.06] px-6 py-5 hover:bg-white/[0.05] transition-all"
+                className="group flex items-start gap-5 rounded-2xl bg-card border border-border px-6 py-5 hover:bg-card-hover hover:shadow-sm transition-all"
               >
                 <div
                   className="w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold text-white shrink-0 mt-0.5"
@@ -238,9 +238,9 @@ export default function LandingPage() {
                 <div className="min-w-0">
                   <div className="flex items-baseline gap-3 flex-wrap">
                     <h3 className="text-base font-semibold">{p.name}</h3>
-                    <span className="text-xs text-white/25 font-mono">Weeks {p.weeks}</span>
+                    <span className="text-xs text-muted-light font-mono">Weeks {p.weeks}</span>
                   </div>
-                  <p className="text-sm text-white/40 mt-1 leading-relaxed">{p.focus}</p>
+                  <p className="text-sm text-muted mt-1 leading-relaxed">{p.focus}</p>
                 </div>
               </div>
             ))}
@@ -249,9 +249,9 @@ export default function LandingPage() {
       </section>
 
       {/* ── FEATURES ── */}
-      <section className="py-24 sm:py-32 px-6 border-t border-white/[0.06]">
+      <section className="py-24 sm:py-32 px-6 border-t border-border">
         <div className="max-w-4xl mx-auto">
-          <p className="text-xs font-semibold uppercase tracking-[0.25em] text-white/30 mb-3">
+          <p className="text-xs font-semibold uppercase tracking-[0.25em] text-muted-light mb-3">
             Built for riders
           </p>
           <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
@@ -291,13 +291,13 @@ export default function LandingPage() {
             ].map((f) => (
               <div
                 key={f.title}
-                className="rounded-2xl bg-white/[0.03] border border-white/[0.06] p-6 hover:bg-white/[0.05] transition-all"
+                className="rounded-2xl bg-card border border-border p-6 hover:bg-card-hover hover:shadow-sm transition-all"
               >
-                <div className="w-10 h-10 rounded-xl bg-white/[0.06] flex items-center justify-center text-white/60 mb-4">
+                <div className="w-10 h-10 rounded-xl bg-background border border-border flex items-center justify-center text-muted mb-4">
                   {f.icon}
                 </div>
                 <h3 className="text-sm font-semibold mb-1.5">{f.title}</h3>
-                <p className="text-sm text-white/35 leading-relaxed">{f.desc}</p>
+                <p className="text-sm text-muted leading-relaxed">{f.desc}</p>
               </div>
             ))}
           </div>
@@ -305,44 +305,44 @@ export default function LandingPage() {
       </section>
 
       {/* ── QUOTE ── */}
-      <section className="py-20 px-6 border-t border-white/[0.06]">
+      <section className="py-20 px-6 border-t border-border">
         <div className="max-w-3xl mx-auto text-center">
-          <blockquote className="text-2xl sm:text-3xl font-light leading-snug tracking-tight text-white/70 italic">
+          <blockquote className="text-2xl sm:text-3xl font-light leading-snug tracking-tight text-foreground/70 italic">
             &ldquo;Suffering is the currency of improvement. Spend it wisely.&rdquo;
           </blockquote>
-          <p className="mt-5 text-xs uppercase tracking-[0.2em] text-white/25">
+          <p className="mt-5 text-xs uppercase tracking-[0.2em] text-muted-light">
             The philosophy behind every interval
           </p>
         </div>
       </section>
 
       {/* ── AUTH ── */}
-      <section ref={authRef} className="py-24 sm:py-32 px-6 border-t border-white/[0.06]">
+      <section ref={authRef} className="py-24 sm:py-32 px-6 border-t border-border">
         <div className="max-w-md mx-auto">
           <div className="text-center mb-10">
-            <BrandLogo variant="mark" href={null} className="justify-center mb-5 [&_*]:!text-white [&_circle]:!stroke-white/15" />
+            <BrandLogo variant="mark" href={null} className="justify-center mb-5" />
             <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">
               Ready to ride?
             </h2>
-            <p className="text-sm text-white/40 mt-2">
+            <p className="text-sm text-muted mt-2">
               Create an account or sign in to begin your plan.
             </p>
           </div>
 
           {!firebaseConfigured && (
-            <div className="mb-6 rounded-2xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-200">
+            <div className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950">
               <p className="font-semibold">Firebase config not found</p>
               {missingFirebaseEnvVars.length > 0 && (
-                <p className="mt-1 text-xs text-amber-200/70 font-mono break-all">
+                <p className="mt-1 text-xs text-amber-950/70 font-mono break-all">
                   Missing: {missingFirebaseEnvVars.join(", ")}
                 </p>
               )}
             </div>
           )}
 
-          <div className="rounded-2xl bg-white/[0.04] border border-white/[0.08] overflow-hidden backdrop-blur-sm">
+          <div className="rounded-2xl bg-card border border-border shadow-sm overflow-hidden">
             {/* Tabs */}
-            <div className="grid grid-cols-2 border-b border-white/[0.06]">
+            <div className="grid grid-cols-2 border-b border-border">
               {(["login", "register"] as const).map((t) => (
                 <button
                   key={t}
@@ -351,8 +351,8 @@ export default function LandingPage() {
                   onClick={() => { setTab(t); setError(null); setResetSent(false); }}
                   className={`py-3.5 text-sm font-semibold transition-all disabled:opacity-40 ${
                     tab === t
-                      ? "text-white border-b-2 border-white"
-                      : "text-white/30 hover:text-white/60"
+                      ? "text-foreground border-b-2 border-foreground"
+                      : "text-muted hover:text-foreground"
                   }`}
                 >
                   {t === "login" ? "Sign in" : "Create account"}
@@ -362,7 +362,7 @@ export default function LandingPage() {
 
             <form onSubmit={handleSubmit} className="px-6 pt-6 pb-5 space-y-4">
               <div>
-                <label htmlFor="email" className="block text-xs font-medium text-white/40 mb-1.5">
+                <label htmlFor="email" className="block text-xs font-medium text-muted mb-1.5">
                   Email
                 </label>
                 <input
@@ -372,14 +372,14 @@ export default function LandingPage() {
                   disabled={authDisabled}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-brand/30 transition disabled:opacity-40"
+                  className="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm text-foreground placeholder:text-muted-light focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-brand/30 transition disabled:opacity-40"
                   placeholder="you@example.com"
                   autoComplete="email"
                 />
               </div>
 
               <div>
-                <label htmlFor="password" className="block text-xs font-medium text-white/40 mb-1.5">
+                <label htmlFor="password" className="block text-xs font-medium text-muted mb-1.5">
                   Password
                 </label>
                 <input
@@ -390,17 +390,17 @@ export default function LandingPage() {
                   disabled={authDisabled}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-brand/30 transition disabled:opacity-40"
+                  className="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm text-foreground placeholder:text-muted-light focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-brand/30 transition disabled:opacity-40"
                   placeholder="At least 6 characters"
                   autoComplete={tab === "login" ? "current-password" : "new-password"}
                 />
               </div>
 
               {error && (
-                <p className="text-xs text-red-400 bg-red-400/10 rounded-lg px-3 py-2">{error}</p>
+                <p className="text-xs text-red-600 bg-red-50 rounded-lg px-3 py-2">{error}</p>
               )}
               {resetSent && (
-                <p className="text-xs text-emerald-400 bg-emerald-400/10 rounded-lg px-3 py-2">
+                <p className="text-xs text-done bg-done-bg rounded-lg px-3 py-2">
                   Password reset email sent. Check your inbox.
                 </p>
               )}
@@ -408,7 +408,7 @@ export default function LandingPage() {
               <button
                 type="submit"
                 disabled={authDisabled}
-                className="w-full rounded-xl bg-white text-[#0c0a09] py-2.5 text-sm font-semibold hover:bg-white/90 transition disabled:opacity-40"
+                className="w-full rounded-xl bg-foreground text-background py-2.5 text-sm font-semibold hover:bg-foreground/90 transition disabled:opacity-40"
               >
                 {busy ? "..." : tab === "login" ? "Sign in" : "Create account"}
               </button>
@@ -418,7 +418,7 @@ export default function LandingPage() {
                   type="button"
                   onClick={handleReset}
                   disabled={authDisabled}
-                  className="w-full text-xs text-white/30 hover:text-white/60 transition disabled:opacity-40"
+                  className="w-full text-xs text-muted hover:text-foreground transition disabled:opacity-40"
                 >
                   Forgot password?
                 </button>
@@ -427,9 +427,9 @@ export default function LandingPage() {
 
             {/* Divider */}
             <div className="flex items-center gap-3 px-6">
-              <div className="flex-1 h-px bg-white/[0.06]" />
-              <span className="text-[10px] font-semibold text-white/20 uppercase tracking-wider">or</span>
-              <div className="flex-1 h-px bg-white/[0.06]" />
+              <div className="flex-1 h-px bg-border" />
+              <span className="text-[10px] font-semibold text-muted-light uppercase tracking-wider">or</span>
+              <div className="flex-1 h-px bg-border" />
             </div>
 
             {/* Google */}
@@ -438,7 +438,7 @@ export default function LandingPage() {
                 type="button"
                 onClick={handleGoogle}
                 disabled={authDisabled}
-                className="w-full flex items-center justify-center gap-2.5 rounded-xl border border-white/10 bg-white/[0.04] py-2.5 text-sm font-medium text-white hover:bg-white/[0.08] transition disabled:opacity-40"
+                className="w-full flex items-center justify-center gap-2.5 rounded-xl border border-border bg-background py-2.5 text-sm font-medium text-foreground hover:bg-card-hover transition disabled:opacity-40"
               >
                 <svg width="18" height="18" viewBox="0 0 24 24">
                   <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4" />
@@ -454,10 +454,10 @@ export default function LandingPage() {
       </section>
 
       {/* ── FOOTER ── */}
-      <footer className="border-t border-white/[0.06] py-10 px-6">
+      <footer className="border-t border-border py-10 px-6">
         <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <BrandLogo variant="horizontal" href={null} className="gap-2 [&_*]:!text-white/40 [&_circle]:!stroke-white/10" />
-          <p className="text-xs text-white/20">
+          <BrandLogo variant="horizontal" href={null} className="gap-2" />
+          <p className="text-xs text-muted-light">
             Built for the suffering. Designed for the glory.
           </p>
         </div>

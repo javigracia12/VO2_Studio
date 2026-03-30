@@ -1,6 +1,7 @@
 "use client";
 
-import { PHASE_META } from "@/data/plan";
+import { useState } from "react";
+import { PHASE_META, type Session } from "@/data/plan";
 import {
   getTodayPlan,
   getTomorrowPlan,
@@ -11,9 +12,11 @@ import {
 } from "@/lib/schedule";
 import { useProgress } from "@/lib/hooks";
 import SessionCard from "@/components/SessionCard";
+import SessionDetailModal from "@/components/SessionDetailModal";
 
 export default function TodayPage() {
   const { toggle, isDone, saveEntry, getEntry } = useProgress();
+  const [selectedSession, setSelectedSession] = useState<Session | null>(null);
   const started = hasTrainingStarted();
   const todayPlan = getTodayPlan();
   const tomorrowPlan = getTomorrowPlan();
@@ -35,15 +38,30 @@ export default function TodayPage() {
             </h2>
             <div className="space-y-3">
               {tomorrowPlan.day.sessions.map((session) => (
-                <SessionCard
+                <div
                   key={session.id}
-                  session={session}
-                  isDone={isDone(session.id)}
-                  onToggle={toggle}
-                />
+                  className="cursor-pointer"
+                  onClick={() => setSelectedSession(session)}
+                >
+                  <SessionCard
+                    session={session}
+                    isDone={isDone(session.id)}
+                    onToggle={toggle}
+                  />
+                </div>
               ))}
             </div>
           </div>
+        )}
+        {selectedSession && (
+          <SessionDetailModal
+            session={selectedSession}
+            entry={getEntry(selectedSession.id)}
+            isDone={isDone(selectedSession.id)}
+            onToggle={toggle}
+            onSaveEntry={saveEntry}
+            onClose={() => setSelectedSession(null)}
+          />
         )}
       </div>
     );
@@ -96,14 +114,19 @@ export default function TodayPage() {
 
         <div className="mt-6 space-y-3">
           {todayPlan?.day.sessions.map((session) => (
-            <SessionCard
+            <div
               key={session.id}
-              session={session}
-              entry={getEntry(session.id)}
-              isDone={isDone(session.id)}
-              onToggle={toggle}
-              onSaveEntry={saveEntry}
-            />
+              className="cursor-pointer"
+              onClick={() => setSelectedSession(session)}
+            >
+              <SessionCard
+                session={session}
+                entry={getEntry(session.id)}
+                isDone={isDone(session.id)}
+                onToggle={toggle}
+                onSaveEntry={saveEntry}
+              />
+            </div>
           ))}
         </div>
       </div>
@@ -116,17 +139,33 @@ export default function TodayPage() {
           </h2>
           <div className="space-y-3">
             {tomorrowPlan.day.sessions.map((session) => (
-              <SessionCard
+              <div
                 key={session.id}
-                session={session}
-                entry={getEntry(session.id)}
-                isDone={isDone(session.id)}
-                onToggle={toggle}
-                onSaveEntry={saveEntry}
-              />
+                className="cursor-pointer"
+                onClick={() => setSelectedSession(session)}
+              >
+                <SessionCard
+                  session={session}
+                  entry={getEntry(session.id)}
+                  isDone={isDone(session.id)}
+                  onToggle={toggle}
+                  onSaveEntry={saveEntry}
+                />
+              </div>
             ))}
           </div>
         </div>
+      )}
+
+      {selectedSession && (
+        <SessionDetailModal
+          session={selectedSession}
+          entry={getEntry(selectedSession.id)}
+          isDone={isDone(selectedSession.id)}
+          onToggle={toggle}
+          onSaveEntry={saveEntry}
+          onClose={() => setSelectedSession(null)}
+        />
       )}
     </div>
   );

@@ -1,6 +1,7 @@
 "use client";
 
-import { PLAN, PHASE_META, DAY_LABELS, type DayOfWeek } from "@/data/plan";
+import { useState } from "react";
+import { PLAN, PHASE_META, DAY_LABELS, type DayOfWeek, type Session } from "@/data/plan";
 import {
   getCurrentWeekNumber,
   getDateForDay,
@@ -11,9 +12,11 @@ import {
 } from "@/lib/schedule";
 import { useProgress, useWeekStats } from "@/lib/hooks";
 import SessionCard from "@/components/SessionCard";
+import SessionDetailModal from "@/components/SessionDetailModal";
 
 export default function WeekPage() {
   const { progress, toggle, isDone, saveEntry, getEntry } = useProgress();
+  const [selectedSession, setSelectedSession] = useState<Session | null>(null);
   const weekNum = getCurrentWeekNumber();
   const week = PLAN.find((w) => w.weekNumber === weekNum);
   const weekStats = useWeekStats(weekNum, progress);
@@ -148,7 +151,10 @@ export default function WeekPage() {
               <div className="px-3 py-2">
                 {dayPlan.sessions.map((session) => (
                   <div key={session.id} className="flex items-center gap-2">
-                    <div className="flex-1">
+                    <div
+                      className="flex-1 cursor-pointer rounded-xl hover:bg-card-hover transition-colors"
+                      onClick={() => setSelectedSession(session)}
+                    >
                       <SessionCard
                         session={session}
                         entry={getEntry(session.id)}
@@ -190,6 +196,17 @@ export default function WeekPage() {
           );
         })}
       </div>
+
+      {selectedSession && (
+        <SessionDetailModal
+          session={selectedSession}
+          entry={getEntry(selectedSession.id)}
+          isDone={isDone(selectedSession.id)}
+          onToggle={toggle}
+          onSaveEntry={saveEntry}
+          onClose={() => setSelectedSession(null)}
+        />
+      )}
     </div>
   );
 }

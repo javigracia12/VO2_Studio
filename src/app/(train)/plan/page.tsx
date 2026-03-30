@@ -6,6 +6,7 @@ import {
   PHASE_META,
   ZONES,
   type Phase,
+  type Session,
 } from "@/data/plan";
 import {
   getCurrentWeekNumber,
@@ -15,6 +16,7 @@ import {
 import { useProgress, useWeekStats } from "@/lib/hooks";
 import { type ProgressMap, type SessionEntry } from "@/lib/progress";
 import SessionCard from "@/components/SessionCard";
+import SessionDetailModal from "@/components/SessionDetailModal";
 
 const PHASES: { phase: Phase; weeks: number[] }[] = [
   { phase: "foundation", weeks: [1, 2, 3, 4] },
@@ -28,6 +30,7 @@ export default function PlanPage() {
   const { progress, toggle, isDone, saveEntry, getEntry } = useProgress();
   const currentWeek = getCurrentWeekNumber();
   const [expandedWeek, setExpandedWeek] = useState<number | null>(currentWeek);
+  const [selectedSession, setSelectedSession] = useState<Session | null>(null);
 
   return (
     <div className="space-y-10">
@@ -102,12 +105,24 @@ export default function PlanPage() {
                   isDone={isDone}
                   saveEntry={saveEntry}
                   getEntry={getEntry}
+                  onSelectSession={setSelectedSession}
                 />
               ))}
             </div>
           </div>
         );
       })}
+
+      {selectedSession && (
+        <SessionDetailModal
+          session={selectedSession}
+          entry={getEntry(selectedSession.id)}
+          isDone={isDone(selectedSession.id)}
+          onToggle={toggle}
+          onSaveEntry={saveEntry}
+          onClose={() => setSelectedSession(null)}
+        />
+      )}
     </div>
   );
 }
@@ -122,6 +137,7 @@ function WeekAccordion({
   isDone,
   saveEntry,
   getEntry,
+  onSelectSession,
 }: {
   week: (typeof PLAN)[number];
   isExpanded: boolean;
@@ -132,6 +148,7 @@ function WeekAccordion({
   isDone: (id: string) => boolean;
   saveEntry: (id: string, rpe: number, note: string) => void;
   getEntry: (id: string) => SessionEntry | undefined;
+  onSelectSession: (session: Session) => void;
 }) {
   const meta = PHASE_META[week.phase];
   const stats = useWeekStats(week.weekNumber, progress);
@@ -246,7 +263,10 @@ function WeekAccordion({
                         key={session.id}
                         className="flex items-center gap-1"
                       >
-                        <div className="flex-1">
+                        <div
+                          className="flex-1 cursor-pointer rounded-xl hover:bg-card-hover transition-colors"
+                          onClick={() => onSelectSession(session)}
+                        >
                           <SessionCard
                             session={session}
                             entry={getEntry(session.id)}
