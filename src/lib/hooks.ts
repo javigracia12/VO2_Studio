@@ -1,40 +1,9 @@
 "use client";
 
-import { useState, useCallback } from "react";
-import {
-  loadProgress,
-  toggleSession as toggleSessionFn,
-  saveEntry as saveEntryFn,
-  type ProgressMap,
-  type SessionEntry,
-} from "./progress";
+import type { ProgressMap } from "./progress";
 import { PLAN, getAllSessions } from "@/data/plan";
 
-export function useProgress() {
-  const [progress, setProgress] = useState<ProgressMap>(() => loadProgress());
-
-  const toggle = useCallback((sessionId: string) => {
-    const updated = toggleSessionFn(sessionId);
-    setProgress(updated);
-  }, []);
-
-  const saveEntry = useCallback((sessionId: string, rpe: number, note: string) => {
-    const updated = saveEntryFn(sessionId, rpe, note);
-    setProgress(updated);
-  }, []);
-
-  const isDone = useCallback(
-    (sessionId: string) => !!progress[sessionId]?.done,
-    [progress]
-  );
-
-  const getEntry = useCallback(
-    (sessionId: string): SessionEntry | undefined => progress[sessionId],
-    [progress]
-  );
-
-  return { progress, toggle, isDone, saveEntry, getEntry };
-}
+export { useProgress } from "@/context/ProgressProvider";
 
 export function useStats(progress: ProgressMap) {
   const allSessions = getAllSessions().filter(

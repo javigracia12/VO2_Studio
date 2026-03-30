@@ -3,10 +3,11 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import BrandLogo from "@/components/BrandLogo";
+import { useAuth } from "@/context/AuthProvider";
 
 const NAV_ITEMS = [
   {
-    href: "/",
+    href: "/dashboard",
     label: "Dashboard",
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -57,13 +58,14 @@ const NAV_ITEMS = [
 
 export default function Navigation() {
   const pathname = usePathname();
+  const { signOut } = useAuth();
 
   return (
     <>
       {/* Desktop sidebar */}
       <nav className="hidden lg:flex fixed left-0 top-0 bottom-0 w-[72px] flex-col items-center py-6 gap-1 bg-card border-r border-border z-50">
         <div className="mb-6">
-          <BrandLogo variant="mark" className="justify-center" />
+          <BrandLogo variant="mark" href="/dashboard" className="justify-center" />
         </div>
         {NAV_ITEMS.map((item) => {
           const active = pathname === item.href;
@@ -82,6 +84,22 @@ export default function Navigation() {
             </Link>
           );
         })}
+
+        {/* Sign out at bottom */}
+        <div className="mt-auto">
+          <button
+            onClick={() => signOut()}
+            className="flex flex-col items-center gap-0.5 px-3 py-2.5 rounded-xl text-[10px] font-medium text-muted hover:text-foreground hover:bg-background/60 transition-all duration-200"
+            title="Sign out"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+              <polyline points="16 17 21 12 16 7" />
+              <line x1="21" y1="12" x2="9" y2="12" />
+            </svg>
+            <span className="mt-0.5">Exit</span>
+          </button>
+        </div>
       </nav>
 
       {/* Mobile bottom nav */}
@@ -101,6 +119,17 @@ export default function Navigation() {
             </Link>
           );
         })}
+        <button
+          onClick={() => signOut()}
+          className="flex flex-col items-center gap-0.5 px-4 py-2.5 text-[10px] font-medium text-muted-light hover:text-foreground transition-colors duration-200"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+            <polyline points="16 17 21 12 16 7" />
+            <line x1="21" y1="12" x2="9" y2="12" />
+          </svg>
+          <span>Exit</span>
+        </button>
       </nav>
     </>
   );

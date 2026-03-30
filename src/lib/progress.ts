@@ -34,17 +34,39 @@ export function saveProgress(map: ProgressMap): void {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(map));
 }
 
+/** Pure update for React + cloud sync (does not read/write localStorage). */
+export function toggleSessionInMap(
+  map: ProgressMap,
+  sessionId: string
+): ProgressMap {
+  const next: ProgressMap = { ...map };
+  const current = next[sessionId];
+  if (current?.done) {
+    next[sessionId] = { done: false };
+  } else {
+    next[sessionId] = { ...current, done: true };
+  }
+  return next;
+}
+
+/** Pure update for React + cloud sync (does not read/write localStorage). */
+export function saveEntryInMap(
+  map: ProgressMap,
+  sessionId: string,
+  rpe: number,
+  note: string
+): ProgressMap {
+  return {
+    ...map,
+    [sessionId]: { ...map[sessionId], done: true, rpe, note },
+  };
+}
+
 export function toggleSession(sessionId: string): ProgressMap {
   const map = loadProgress();
-  const current = map[sessionId];
-  if (current?.done) {
-    // Toggling off — clear the whole entry
-    map[sessionId] = { done: false };
-  } else {
-    map[sessionId] = { ...current, done: true };
-  }
-  saveProgress(map);
-  return { ...map };
+  const next = toggleSessionInMap(map, sessionId);
+  saveProgress(next);
+  return next;
 }
 
 export function saveEntry(
@@ -53,9 +75,9 @@ export function saveEntry(
   note: string
 ): ProgressMap {
   const map = loadProgress();
-  map[sessionId] = { ...map[sessionId], done: true, rpe, note };
-  saveProgress(map);
-  return { ...map };
+  const next = saveEntryInMap(map, sessionId, rpe, note);
+  saveProgress(next);
+  return next;
 }
 
 export function getEntry(

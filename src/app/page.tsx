@@ -1,303 +1,278 @@
 "use client";
 
-import { PLAN, PHASE_META } from "@/data/plan";
-import {
-  getCurrentWeekNumber,
-  getTodayPlan,
-  getTomorrowPlan,
-  hasTrainingStarted,
-  daysUntilStart,
-  getDateForDay,
-  formatDate,
-  formatDateLong,
-} from "@/lib/schedule";
-import { TRAINING_START_DATE } from "@/data/config";
-import { useProgress, useStats } from "@/lib/hooks";
-import SessionCard from "@/components/SessionCard";
-import ProgressRing from "@/components/ProgressRing";
-import WeekChart from "@/components/WeekChart";
+import { useEffect, useState, type FormEvent } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthProvider";
+import BrandLogo from "@/components/BrandLogo";
+import { FirebaseError } from "firebase/app";
 
-export default function Dashboard() {
-  const { progress, toggle, isDone, saveEntry, getEntry } = useProgress();
-  const stats = useStats(progress);
-  const started = hasTrainingStarted();
-  const weekNum = getCurrentWeekNumber();
-  const week = PLAN.find((w) => w.weekNumber === weekNum);
-  const todayPlan = getTodayPlan();
-  const tomorrowPlan = getTomorrowPlan();
+type Tab = "login" | "register";
 
-  const phaseMeta = week ? PHASE_META[week.phase] : null;
+const FIREBASE_ERRORS: Record<string, string> = {
+  "auth/invalid-credential": "Email or password is incorrect.",
+  "auth/user-not-found": "No account found with that email.",
+  "auth/wrong-password": "Incorrect password.",
+  "auth/email-already-in-use": "An account with that email already exists.",
+  "auth/weak-password": "Password should be at least 6 characters.",
+  "auth/invalid-email": "Please enter a valid email address.",
+  "auth/too-many-requests": "Too many attempts. Please try again later.",
+  "auth/popup-closed-by-user": "Sign-in popup was closed.",
+};
 
-  const upNextSessions = started
-    ? todayPlan?.day.sessions ?? []
-    : PLAN.find((w) => w.weekNumber === 1)?.days.find((d) => d.day === "mon")
-        ?.sessions ?? [];
-
-  const upNextLabel = started
-    ? todayPlan?.day.label ?? "Today"
-    : `Monday, ${formatDate(getDateForDay(1, "mon"))}`;
-
-  const upNextWeekLabel = started
-    ? `Week ${weekNum}`
-    : "Week 1";
-
-  return (
-    <div className="space-y-10">
-      {/* Hero */}
-      <header>
-        {!started ? (
-          <div className="flex items-end justify-between gap-6 flex-wrap">
-            <div>
-              <p className="text-xs font-semibold text-muted uppercase tracking-widest">
-                Training starts in
-              </p>
-              <h1 className="text-5xl font-bold tracking-tight mt-1.5 tabular-nums">
-                {daysUntilStart()}{" "}
-                <span className="text-muted-light text-3xl font-medium">
-                  days
-                </span>
-              </h1>
-            </div>
-            <p className="text-sm text-muted pb-1">
-              16 weeks &middot; begins{" "}
-              {formatDateLong(TRAINING_START_DATE)}
-            </p>
-          </div>
-        ) : (
-          <div>
-            <div className="flex items-center gap-2 flex-wrap">
-              {phaseMeta && (
-                <span
-                  className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold"
-                  style={{
-                    backgroundColor: phaseMeta.bg,
-                    color: phaseMeta.color,
-                  }}
-                >
-                  Phase {week!.phaseNumber} &middot; {phaseMeta.name}
-                </span>
-              )}
-              {week?.isDeload && (
-                <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold bg-done-bg text-done">
-                  Deload
-                </span>
-              )}
-            </div>
-            <h1 className="text-5xl font-bold tracking-tight mt-3">
-              Week {weekNum}
-              <span className="text-muted-light font-normal text-3xl">
-                {" "}
-                / 16
-              </span>
-            </h1>
-            {week?.notes && (
-              <p className="text-sm text-muted mt-3 max-w-2xl leading-relaxed">
-                {week.notes}
-              </p>
-            )}
-          </div>
-        )}
-      </header>
-
-      {/* Two-column: Up Next + Progress Card */}
-      <section className="grid gap-4 lg:grid-cols-5 items-start">
-        {/* Up Next — left, wider */}
-        <div className="lg:col-span-3 bg-card rounded-2xl border border-border overflow-hidden">
-          <div className="px-6 pt-5 pb-4 border-b border-border/60">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-[11px] font-semibold text-muted uppercase tracking-widest">
-                  Up Next
-                </h2>
-                <p className="text-sm font-medium text-foreground mt-0.5">
-                  {upNextWeekLabel} &middot; {upNextLabel}
-                </p>
-              </div>
-              {phaseMeta && started && (
-                <div
-                  className="w-2 h-2 rounded-full"
-                  style={{ backgroundColor: phaseMeta.color }}
-                />
-              )}
-            </div>
-          </div>
-          <div className="px-4 py-4 space-y-2">
-            {upNextSessions.map((session) => (
-              <SessionCard
-                key={session.id}
-                session={session}
-                entry={getEntry(session.id)}
-                isDone={isDone(session.id)}
-                onToggle={toggle}
-                onSaveEntry={saveEntry}
-              />
-            ))}
-          </div>
-          {/* Tomorrow preview */}
-          {started && tomorrowPlan && (
-            <div className="border-t border-border/60 px-4 py-4">
-              <p className="text-[11px] font-semibold text-muted uppercase tracking-widest px-1 mb-2">
-                Tomorrow
-              </p>
-              {tomorrowPlan.day.sessions.map((session) => (
-                <SessionCard
-                  key={session.id}
-                  session={session}
-                  entry={getEntry(session.id)}
-                  isDone={isDone(session.id)}
-                  onToggle={toggle}
-                  onSaveEntry={saveEntry}
-                  compact
-                />
-              ))}
-            </div>
-          )}
-          {!started && (
-            <div className="border-t border-border/60 px-4 py-4">
-              <p className="text-[11px] font-semibold text-muted uppercase tracking-widest px-1 mb-2">
-                Then
-              </p>
-              {PLAN.find((w) => w.weekNumber === 1)
-                ?.days.find((d) => d.day === "tue")
-                ?.sessions.map((session) => (
-                  <SessionCard
-                    key={session.id}
-                    session={session}
-                    entry={getEntry(session.id)}
-                    isDone={isDone(session.id)}
-                    onToggle={toggle}
-                    onSaveEntry={saveEntry}
-                    compact
-                  />
-                ))}
-            </div>
-          )}
-        </div>
-
-        {/* Progress Card — right, narrower */}
-        <div className="lg:col-span-2 bg-card rounded-2xl border border-border p-6 flex flex-col items-center gap-6">
-          <ProgressRing
-            percentage={stats.completionPct}
-            size={140}
-            strokeWidth={10}
-          />
-          <div className="w-full space-y-0 divide-y divide-border/60">
-            <ProgressRow
-              label="Hours"
-              done={`${stats.doneHours}h`}
-              total={`${stats.totalPlannedHours}h`}
-              pct={
-                stats.totalPlannedHours > 0
-                  ? Math.round(
-                      (stats.doneHours / stats.totalPlannedHours) * 100
-                    )
-                  : 0
-              }
-            />
-            <ProgressRow
-              label="Sessions"
-              done={`${stats.completedSessions}`}
-              total={`${stats.totalSessions}`}
-              pct={stats.completionPct}
-            />
-            <ProgressRow
-              label="Weeks"
-              done={`${stats.weeksCompleted}`}
-              total="16"
-              pct={Math.round((stats.weeksCompleted / 16) * 100)}
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* Volume Chart */}
-      <WeekChart progress={progress} />
-
-      {/* Week at a glance — only during training */}
-      {started && week && (
-        <section>
-          <h2 className="text-[11px] font-semibold text-muted uppercase tracking-widest mb-3">
-            This week
-          </h2>
-          <div className="grid grid-cols-7 gap-1.5">
-            {week.days.map((dayPlan) => {
-              const date = getDateForDay(week.weekNumber, dayPlan.day);
-              const activeSessions = dayPlan.sessions.filter(
-                (s) => s.type !== "rest" && s.durationMinutes > 0
-              );
-              const allDone =
-                activeSessions.length > 0 &&
-                activeSessions.every((s) => isDone(s.id));
-              const totalMin = dayPlan.sessions.reduce(
-                (sum, s) => sum + s.durationMinutes,
-                0
-              );
-              const isRest = activeSessions.length === 0;
-
-              return (
-                <div
-                  key={dayPlan.day}
-                  className={`rounded-xl p-2.5 text-center transition-all ${
-                    allDone
-                      ? "bg-done-bg/40 ring-1 ring-done/20"
-                      : "bg-card ring-1 ring-border"
-                  }`}
-                >
-                  <p className="text-[10px] font-semibold text-muted uppercase">
-                    {dayPlan.day}
-                  </p>
-                  <p className="text-xs font-semibold mt-1 text-foreground">
-                    {formatDate(date)}
-                  </p>
-                  {isRest ? (
-                    <p className="text-[10px] text-muted-light mt-1">Rest</p>
-                  ) : (
-                    <p className="text-[10px] text-muted mt-1 tabular-nums">
-                      {totalMin < 60
-                        ? `${totalMin}m`
-                        : `${(totalMin / 60).toFixed(1)}h`}
-                    </p>
-                  )}
-                  {allDone && (
-                    <p className="text-done text-[10px] font-semibold mt-0.5">
-                      Done
-                    </p>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </section>
-      )}
-    </div>
-  );
+function friendlyError(err: unknown): string {
+  if (err instanceof FirebaseError) {
+    return FIREBASE_ERRORS[err.code] ?? err.message;
+  }
+  if (err instanceof Error) return err.message;
+  return "Something went wrong. Please try again.";
 }
 
-function ProgressRow({
-  label,
-  done,
-  total,
-  pct,
-}: {
-  label: string;
-  done: string;
-  total: string;
-  pct: number;
-}) {
+const FEATURES = [
+  { title: "16-week plan", desc: "Periodised phases from base to taper" },
+  { title: "Session tracking", desc: "Tick workouts, log RPE and notes" },
+  { title: "Cloud sync", desc: "Progress follows you across devices" },
+];
+
+export default function LandingPage() {
+  const { user, loading, signInWithEmail, signUpWithEmail, signInWithGoogle, resetPassword } =
+    useAuth();
+  const router = useRouter();
+
+  const [tab, setTab] = useState<Tab>("login");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [resetSent, setResetSent] = useState(false);
+
+  useEffect(() => {
+    if (!loading && user) {
+      router.replace("/dashboard");
+    }
+  }, [user, loading, router]);
+
+  if (loading || user) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="w-6 h-6 border-2 border-foreground/20 border-t-foreground rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  async function handleSubmit(e: FormEvent) {
+    e.preventDefault();
+    setError(null);
+    setBusy(true);
+    try {
+      if (tab === "login") {
+        await signInWithEmail(email, password);
+      } else {
+        await signUpWithEmail(email, password);
+      }
+    } catch (err) {
+      setError(friendlyError(err));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function handleGoogle() {
+    setError(null);
+    setBusy(true);
+    try {
+      await signInWithGoogle();
+    } catch (err) {
+      setError(friendlyError(err));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function handleReset() {
+    if (!email.trim()) {
+      setError("Enter your email above, then click reset.");
+      return;
+    }
+    setError(null);
+    setBusy(true);
+    try {
+      await resetPassword(email);
+      setResetSent(true);
+    } catch (err) {
+      setError(friendlyError(err));
+    } finally {
+      setBusy(false);
+    }
+  }
+
   return (
-    <div className="flex items-center justify-between py-3.5">
-      <span className="text-xs font-medium text-muted">{label}</span>
-      <div className="flex items-center gap-3">
-        <div className="w-20 h-1.5 rounded-full bg-border/60 overflow-hidden">
-          <div
-            className="h-full rounded-full bg-foreground/70 transition-all duration-500"
-            style={{ width: `${pct}%` }}
-          />
+    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-12 relative overflow-hidden">
+      {/* Subtle gradient backdrop */}
+      <div
+        className="pointer-events-none absolute inset-0 -z-10"
+        style={{
+          background:
+            "radial-gradient(ellipse 70% 50% at 50% 20%, var(--color-brand)/0.06, transparent 70%), " +
+            "radial-gradient(ellipse 60% 40% at 80% 70%, var(--color-brand-warm)/0.05, transparent 60%)",
+        }}
+      />
+
+      {/* Hero */}
+      <div className="text-center mb-10 max-w-md">
+        <div className="flex justify-center mb-5">
+          <BrandLogo variant="horizontal" href={null} className="gap-3" />
         </div>
-        <span className="text-xs tabular-nums text-foreground font-medium">
-          {done}
-          <span className="text-muted-light font-normal"> / {total}</span>
-        </span>
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
+          Your training, structured.
+        </h1>
+        <p className="text-sm text-muted mt-2 leading-relaxed">
+          Plan, track and review every session across a periodised 16-week block.
+        </p>
+
+        {/* Feature pills */}
+        <div className="flex flex-wrap justify-center gap-2 mt-5">
+          {FEATURES.map((f) => (
+            <div
+              key={f.title}
+              className="px-3 py-1.5 rounded-full bg-card border border-border text-xs text-muted"
+            >
+              <span className="font-semibold text-foreground">{f.title}</span>{" "}
+              — {f.desc}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Auth card */}
+      <div className="w-full max-w-sm">
+        <div className="bg-card border border-border rounded-2xl shadow-sm overflow-hidden">
+          {/* Tabs */}
+          <div className="grid grid-cols-2 border-b border-border">
+            {(["login", "register"] as const).map((t) => (
+              <button
+                key={t}
+                onClick={() => {
+                  setTab(t);
+                  setError(null);
+                  setResetSent(false);
+                }}
+                className={`py-3 text-sm font-semibold transition-colors ${
+                  tab === t
+                    ? "text-foreground border-b-2 border-foreground"
+                    : "text-muted hover:text-foreground"
+                }`}
+              >
+                {t === "login" ? "Sign in" : "Create account"}
+              </button>
+            ))}
+          </div>
+
+          <form onSubmit={handleSubmit} className="px-6 pt-5 pb-6 space-y-4">
+            <div>
+              <label htmlFor="email" className="block text-xs font-medium text-muted mb-1.5">
+                Email
+              </label>
+              <input
+                id="email"
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted-light focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand/40 transition"
+                placeholder="you@example.com"
+                autoComplete="email"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="password" className="block text-xs font-medium text-muted mb-1.5">
+                Password
+              </label>
+              <input
+                id="password"
+                type="password"
+                required
+                minLength={6}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted-light focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand/40 transition"
+                placeholder="At least 6 characters"
+                autoComplete={tab === "login" ? "current-password" : "new-password"}
+              />
+            </div>
+
+            {error && (
+              <p className="text-xs text-red-600 bg-red-50 rounded-lg px-3 py-2">{error}</p>
+            )}
+
+            {resetSent && (
+              <p className="text-xs text-done bg-done-bg rounded-lg px-3 py-2">
+                Password reset email sent. Check your inbox.
+              </p>
+            )}
+
+            <button
+              type="submit"
+              disabled={busy}
+              className="w-full rounded-xl bg-foreground text-background py-2.5 text-sm font-semibold hover:opacity-90 transition disabled:opacity-50"
+            >
+              {busy
+                ? "..."
+                : tab === "login"
+                ? "Sign in"
+                : "Create account"}
+            </button>
+
+            {tab === "login" && (
+              <button
+                type="button"
+                onClick={handleReset}
+                disabled={busy}
+                className="w-full text-xs text-muted hover:text-foreground transition"
+              >
+                Forgot password?
+              </button>
+            )}
+          </form>
+
+          {/* Divider */}
+          <div className="flex items-center gap-3 px-6">
+            <div className="flex-1 h-px bg-border" />
+            <span className="text-[10px] font-semibold text-muted uppercase tracking-wider">
+              or
+            </span>
+            <div className="flex-1 h-px bg-border" />
+          </div>
+
+          {/* Google */}
+          <div className="px-6 pt-4 pb-6">
+            <button
+              onClick={handleGoogle}
+              disabled={busy}
+              className="w-full flex items-center justify-center gap-2.5 rounded-xl border border-border bg-background py-2.5 text-sm font-medium text-foreground hover:bg-card-hover transition disabled:opacity-50"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24">
+                <path
+                  d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"
+                  fill="#4285F4"
+                />
+                <path
+                  d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                  fill="#34A853"
+                />
+                <path
+                  d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18A10.96 10.96 0 0 0 1 12c0 1.77.42 3.45 1.18 4.93l3.66-2.84z"
+                  fill="#FBBC05"
+                />
+                <path
+                  d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                  fill="#EA4335"
+                />
+              </svg>
+              Continue with Google
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );

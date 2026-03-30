@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import Navigation from "@/components/Navigation";
+import { AuthProvider } from "@/context/AuthProvider";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Riding — Training Dashboard",
-  description: "16-week training plan for your 6-day stage race",
+  title: "VO2 Studio — Training Dashboard",
+  description: "16-week structured training plan with cloud sync",
 };
 
 export default function RootLayout({
@@ -29,12 +29,7 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full">
-        <Navigation />
-        <main className="lg:pl-[72px] pb-20 lg:pb-0">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
-            {children}
-          </div>
-        </main>
+        <AuthProvider>{children}</AuthProvider>
       </body>
     </html>
   );
