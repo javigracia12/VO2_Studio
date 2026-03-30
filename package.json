@@ -7,7 +7,11 @@
     "dev:clean": "rm -rf .next && next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "firebase": "firebase",
+    "firebase:login": "firebase login",
+    "firebase:deploy-rules": "firebase deploy --only firestore:rules",
+    "firebase:projects": "firebase projects:list"
   },
   "dependencies": {
     "firebase": "^11.10.0",
@@ -22,6 +26,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.0",
+    "firebase-tools": "^14.0.0",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
